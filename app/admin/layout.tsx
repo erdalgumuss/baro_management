@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { ReactNode, useEffect } from 'react'
 import LoggedInHeader from '@/components/LoggedInHeader'
 import { Button } from '@/components/ui/button'
 import {
@@ -12,12 +12,32 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { User, Settings, LogOut } from 'lucide-react'
 import ChatbotLayout from '@/components/ChatbotLayout'
+import { useAuth } from '@/hooks/useAuth'
+import Link from 'next/link'
+import { Users } from 'lucide-react'
+import { useRouter } from 'next/router'
 
 export default function DashboardLayout({
   children,
 }: {
   children: ReactNode
 }) {
+  const { userInfo } = useAuth()
+  const router = useRouter()
+
+  // Kullanıcı yönlendirme
+  useEffect(() => {
+    if (!userInfo) return
+
+    if (userInfo.role === 'lawyer') {
+      router.replace('/lawyer/dashboard')
+    }
+  }, [userInfo, router])
+
+  // Rol kontrolleri
+  const isAdmin = userInfo?.role === 'admin'
+  const isBaroOfficer = userInfo?.role === 'baro_officer'
+
   return (
     <ChatbotLayout>
       <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white">
@@ -34,7 +54,7 @@ export default function DashboardLayout({
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src="/avatars/01.png" alt="@username" />
+                        <AvatarImage src="/avatars/01.png" alt={userInfo?.name || 'Kullanıcı'} />
                         <AvatarFallback>BY</AvatarFallback>
                       </Avatar>
                     </Button>
@@ -42,9 +62,9 @@ export default function DashboardLayout({
                   <DropdownMenuContent className="w-56" align="end" forceMount>
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">username</p>
+                        <p className="text-sm font-medium leading-none">{userInfo?.name}</p>
                         <p className="text-xs leading-none text-muted-foreground">
-                          m@example.com
+                          {userInfo?.email}
                         </p>
                       </div>
                     </DropdownMenuLabel>
@@ -57,6 +77,14 @@ export default function DashboardLayout({
                       <Settings className="mr-2 h-4 w-4" />
                       <span>Ayarlar</span>
                     </DropdownMenuItem>
+                    {isAdmin && (
+                      <DropdownMenuItem asChild>
+                        <Link href="/dashboard/uye-yonetimi">
+                          <Users className="mr-2 h-4 w-4" />
+                          <span>Üye Yönetimi</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>
                       <LogOut className="mr-2 h-4 w-4" />
@@ -76,4 +104,3 @@ export default function DashboardLayout({
     </ChatbotLayout>
   )
 }
-
