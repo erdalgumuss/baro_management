@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import AvukatDashboard from '@/components/AvukatDashboard'
-import { DavaAramaFiltre } from '@/components/avukat/DavaAramaFiltre'
-import { DavaListesi } from '@/components/avukat/DavaListesi'
-import { DavaDetay } from '@/components/avukat/DavaDetay'
+import AvukatDashboard from '@/components/pages/lawyer/AvukatDashboard'
+import { DavaAramaFiltre } from '@/components/pages/lawyer/case/DavaAramaFiltre'
+import { DavaListesi } from '@/components/pages/lawyer/case/DavaListesi'
+
 
 // Mock data
 const mockDavalar = [
@@ -60,7 +60,7 @@ export default function DavalarPage() {
         <h1 className="text-3xl font-bold">Atanmış Davalar</h1>
         <DavaAramaFiltre onFilter={handleFilter} davalar={mockDavalar} />
         <DavaListesi davalar={davalar} onDetayGor={handleDetayGor} />
-        <DavaDetay 
+        <caseDetails 
           dava={selectedDava} 
           isOpen={isDetailOpen} 
           onClose={() => setIsDetailOpen(false)} 

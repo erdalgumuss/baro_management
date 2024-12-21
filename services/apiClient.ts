@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Axios instance oluşturma
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL, // Backend API base URL
+  baseURL: process.env.BASE_URL, // Backend API base URL
   timeout: 10000, // İsteğin zaman aşımı süresi (ms)
   headers: {
     'Content-Type': 'application/json', // Varsayılan içerik tipi

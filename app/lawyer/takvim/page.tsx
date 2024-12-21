@@ -1,11 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import AvukatDashboard from '@/components/AvukatDashboard'
-import { TakvimGorunumu } from '@/components/avukat/TakvimGorunumu'
-import { YaklasanDurusmalar } from '@/components/avukat/YaklasanDurusmalar'
-import { HatirlaticiListesi } from '@/components/avukat/HatirlaticiListesi'
-import { DurusmaDetayModal } from '@/components/avukat/DurusmaDetayModal'
+import AvukatDashboard from '@/components/pages/lawyer/AvukatDashboard'
+import { TakvimGorunumu } from '@/components/pages/lawyer/calender/TakvimGorunumu'
+import { YaklasanDurusmalar } from '@/components/pages/lawyer/calender/YaklasanDurusmalar'
+import { HatirlaticiListesi } from '@/components/pages/lawyer/calender/HatirlaticiListesi'
+import { DurusmaDetayModal } from '@/components/pages/lawyer/calender/DurusmaDetayModal'
 
 export default function TakvimSayfasi() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())

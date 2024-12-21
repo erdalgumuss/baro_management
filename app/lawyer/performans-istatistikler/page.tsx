@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import AvukatDashboard from '@/components/AvukatDashboard'
+import AvukatDashboard from '@/components/pages/lawyer/AvukatDashboard'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'

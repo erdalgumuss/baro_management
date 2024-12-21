@@ -1,6 +1,6 @@
-import HeroSection from '../components/HeroSection'
-import CitizenActionButtons from '../components/CitizenActionButtons'
-import Footer from '../components/Footer'
+import HeroSection from '../components/pages/index/HeroSection'
+import CitizenActionButtons from '../components/pages/index/CitizenActionButtons'
+import Footer from '../components/layout/Footer'
 
 export default function Home() {
   return (
