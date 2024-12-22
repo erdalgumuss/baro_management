@@ -14,7 +14,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { User, Settings, LogOut } from 'lucide-react'
 import ChatbotLayout from '@/components/ui/ChatbotLayout'
-import { useAuth } from '@/hooks/useAuth'
 import Link from 'next/link'
 import { Users } from 'lucide-react'
 import { useRouter } from 'next/navigation'

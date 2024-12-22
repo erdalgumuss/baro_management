@@ -12,8 +12,9 @@ export interface Tokens {
 interface AuthState {
   isAuthenticated: boolean
   role: string | null
+  isActive: boolean
   tokens: Tokens | null
-  setAuth: (authData: { isAuthenticated: boolean; role: string; tokens: Tokens }) => void
+  setAuth: (authData: { isAuthenticated: boolean; role: string; isActive: boolean;tokens: Tokens }) => void
   clearAuth: () => void
   refreshAccessToken: () => Promise<void>
 }
@@ -22,13 +23,13 @@ export const useAuthStore = create<AuthState>((set) => ({
   isAuthenticated: false,
   role: null,
   tokens: null,
-
-  setAuth: ({ isAuthenticated, role, tokens }) => {
+  isActive:false,
+  setAuth: ({ isAuthenticated, role, tokens, isActive }) => {
     console.log('setAuth çağrıldı:')
     console.log('isAuthenticated:', isAuthenticated)
     console.log('Role:', role)
     console.log('Tokens:', tokens)
-    set({ isAuthenticated, role, tokens })
+    set({ isAuthenticated, role, tokens, isActive })
     localStorage.setItem('accessToken', tokens.accessToken)
     localStorage.setItem('refreshToken', tokens.refreshToken)
   },

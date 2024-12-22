@@ -16,6 +16,14 @@ import { useRouter } from 'next/navigation'
 import { login } from '@/services/authService'
 import { useAuthStore } from '@/store/useAuthStore'
 import CompleteUserRegistrationModal from '@/components/pages/index/CompleteUserRegistrationModal'
+import jwt_decode from 'jwt-decode'
+
+interface DecodedToken {
+  role: string
+  isActive: boolean
+  exp: number
+  [key: string]: unknown
+}
 
 export default function LoginModal() {
   const [isOpen, setIsOpen] = useState(false)
@@ -33,24 +41,35 @@ export default function LoginModal() {
       const { data } = await login(tcNumber, password)
       console.log('Login Yanıtı:', data)
 
-      const { accessToken, refreshToken, isActive } = data
-  
+      const { accessToken, refreshToken } = data
+
+      // Token'ları localStorage'a kaydet
       localStorage.setItem('accessToken', accessToken)
       localStorage.setItem('refreshToken', refreshToken)
       console.log('Access Token:', localStorage.getItem('accessToken'))
       console.log('Refresh Token:', localStorage.getItem('refreshToken'))
-  
-      // Auth durumunu güncelle
-      setAuth({ isAuthenticated: true, role, tokens: { accessToken, refreshToken } })
-      console.log('setAuth sonrası role (Store):', role)
-        
-      if (!isActive) {
-        setTimeout(() => setShowCompleteRegistrationModal(true), 100)
-      } else {
-        console.log('LoginRole (Store):', role)
 
+      // Token çözümleme
+      const decodedToken: DecodedToken = jwt_decode(accessToken)
+      console.log('Decoded Token (LoginModal):', decodedToken)
+
+      // Auth durumunu güncelle
+      setAuth({
+        isAuthenticated: true,
+        role: decodedToken.role, // Token'dan gelen role
+        tokens: { accessToken, refreshToken },
+        isActive: decodedToken.isActive,
+      })
+      console.log('setAuth sonrası role (Store):', role)
+      console.log('Decoded Token,2 (LoginModal):', decodedToken)
+
+      // Kullanıcı aktif değilse kayıt tamamlama modalını aç
+      if (!decodedToken.isActive) {
+        setTimeout(() => setShowCompleteRegistrationModal(true), 100)
+      
+        // Role'e göre yönlendirme
         setTimeout(() => {
-          if (role === 'lawyer') {
+          if (decodedToken.role === 'lawyer') {
             console.log('Lawyer yönlendirmesi başlıyor...')
             router.push('/lawyer')
           } else {
