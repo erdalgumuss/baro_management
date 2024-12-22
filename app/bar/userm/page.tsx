@@ -1,13 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation' // Yönlendirme için kullanıyoruz
 import BaroDashboard from '@/components/pages/bar/BaroDashboard'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import AddMemberModal from '@/components/pages/bar/admin/AddMemberModal'
 import ChangeMemberRoleModal from '@/components/pages/bar/admin/ChangeMemberRoleModal'
 import DeleteMemberModal from '@/components/pages/bar/admin/DeleteMemberModal'
-
+import { useAuthStore } from '@/store/useAuthStore' // Rol kontrolü için useAuthStore kullanıyoruz
 
 interface Member {
   id: number
@@ -24,14 +25,28 @@ export default function MemberManagementPage() {
   const [showChangeRoleModal, setShowChangeRoleModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [memberType, setMemberType] = useState<'lawyer' | 'baro_officer' | null>(null)
-
   const [selectedMember, setSelectedMember] = useState<Member | null>(null)
+
+  const { role } = useAuthStore((state) => state)  // Rolü store'dan alıyoruz
+  const router = useRouter()  // Yönlendirme için router kullanıyoruz
+
+  // Admin olmayan kullanıcıları erişimden men etme
+  useEffect(() => {
+    if (role !== 'admin') {
+      // Eğer kullanıcı admin değilse, ana sayfaya yönlendiriyoruz
+      if(role === 'lawyer'){
+      router.replace('/lawyer') 
+      }else if(role === 'baro_officer'){
+        router.replace('/bar')
+      } // Anasayfaya yönlendir
+    }
+  }, [role, router])
+
   const mockMembers: Member[] = [
     { id: 1, name: 'Ahmet Yılmaz', role: 'lawyer', tcNumber: '12345678901', referenceNumber: 'REF123' },
     { id: 2, name: 'Ayşe Kaya', role: 'baro_officer', tcNumber: '23456789012' },
     { id: 3, name: 'Mehmet Demir', role: 'lawyer', tcNumber: '34567890123', referenceNumber: 'REF456' },
   ]
-  
 
   useEffect(() => {
     // Backend bağlantısı yerine geçici veri kullanıyoruz
@@ -47,7 +62,6 @@ export default function MemberManagementPage() {
     }
     fetchMembers()
   }, [])
-  
 
   const onMemberAdded = (newMember: Member) => {
     setMembers([
@@ -56,7 +70,6 @@ export default function MemberManagementPage() {
     ])
     setShowAddMemberModal(false)
   }
-  
 
   const onRoleChanged = (memberId: number, newRole: 'lawyer' | 'baro_officer') => {
     setMembers(members.map(member =>
@@ -64,13 +77,11 @@ export default function MemberManagementPage() {
     ))
     setShowChangeRoleModal(false)
   }
-  
 
-const onMemberDeleted = (memberId: number) => {
-  setMembers(members.filter(member => member.id !== memberId))
-  setShowDeleteModal(false)
-}
-
+  const onMemberDeleted = (memberId: number) => {
+    setMembers(members.filter(member => member.id !== memberId))
+    setShowDeleteModal(false)
+  }
 
   const openModal = (type: 'add' | 'changeRole' | 'delete', member?: Member) => {
     if (type === 'add') {

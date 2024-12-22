@@ -1,7 +1,8 @@
-import { useCallback } from 'react';
-import { useAuthStore } from '@/store/useAuthStore';
-import { login } from '@/services/authService';
-import jwt_decode from 'jwt-decode';
+import { useState } from "react";
+import jwt_decode from "jwt-decode";
+import { login } from "@/services/authService";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useRouter } from "next/navigation";
 
 interface DecodedToken {
   role: string;
@@ -11,37 +12,63 @@ interface DecodedToken {
 }
 
 export const useAuth = () => {
-  const { setAuth, clearAuth, refreshAccessToken } = useAuthStore();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const setAuth = useAuthStore((state) => state.setAuth);
+  const router = useRouter();
 
-  const handleLogin = useCallback(
-    async (tcNumber: string, password: string) => {
-      try {
-        const { data } = await login(tcNumber, password);
+  const handleLogin = async (tcNumber: string, password: string) => {
+    setLoading(true);
+    setError(null);
 
-        const { accessToken, refreshToken } = data;
-        const decodedToken: DecodedToken = jwt_decode(accessToken);
+    try {
+      const { data } = await login(tcNumber, password);
+      const { accessToken, refreshToken } = data;
 
-        setAuth({
-          isAuthenticated: true,
-          role: decodedToken.role,
-          isActive: decodedToken.isActive,
-          tokens: { accessToken, refreshToken },
-        });
-      } catch (error) {
-        console.error('Login error:', error);
-        throw error;
+      // Token'ları localStorage'a kaydet
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+      
+
+      if (!accessToken || !refreshToken) {
+        console.log('Tokenlar bulunamadı, kullanıcı oturumu doğrulanamadı.')
+        router.replace('/')
+        return
       }
-    },
-    [setAuth]
-  );
+      console.log("accessToken hookta", accessToken)
+      console.log("refreshToken hookta", refreshToken)
 
-  const handleLogout = useCallback(() => {
-    clearAuth();
-  }, [clearAuth]);
+      // Token çözümleme
+      const decodedToken: DecodedToken = jwt_decode(accessToken);
 
-  return {
-    handleLogin,
-    handleLogout,
-    refreshAccessToken,
+      // Auth durumunu güncelle
+      setAuth({
+        isAuthenticated: true,
+        role: decodedToken.role,
+        tokens: { accessToken, refreshToken },
+        isActive: decodedToken.isActive,
+      });
+      localStorage.setItem('isAuthenticated', 'true');
+      localStorage.setItem('role', decodedToken.role);
+      localStorage.setItem('isActive', decodedToken.isActive.toString())
+
+
+      // Yönlendirme ve kayıt tamamlama kontrolü
+      if (!decodedToken.isActive) {
+        return { needsRegistration: true, role: decodedToken.role };
+      }
+
+      return { needsRegistration: false, role: decodedToken.role };
+    } catch (err: any) {
+      console.error("Giriş sırasında hata:", err);
+      setError("Giriş başarısız. Bilgilerinizi kontrol edin.");
+      return { needsRegistration: false, role: null };
+    } finally {
+      setLoading(false);
+    }
   };
+
+  return { handleLogin, loading, error };
 };
+
+export default useAuth;
