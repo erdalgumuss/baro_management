@@ -44,3 +44,4 @@ Role Bazlı Yönlendirme:
 
 Kullanıcı role bilgisine göre /lawyer veya /bar sayfalarına yönlendirilme 
 henüz çalışmıyor. bar/layout.tsx güncellenmeli.
+loginde isActivekontrolü????
