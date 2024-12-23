@@ -1,91 +1,85 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import BaroDashboard from '@/components/pages/bar/BaroDashboard'
-import ApplicationSearchFilter from '@/components/pages/bar/application/ApplicationSearchFilter'
-import ApplicationList from '@/components/pages/bar/application/ApplicationList'
-import ApplicationStatistics from '@/components/pages/bar/application/ApplicationStatistics'
-import ApplicationForm from '@/components/pages/bar/application/ApplicationForm'
-import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useToast } from "@/components/ui/use-toast"
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'; // useState ve useEffect import edildi
+import BaroDashboard from '@/components/pages/bar/BaroDashboard';
+import ApplicationSearchFilter from '@/components/pages/bar/application/ApplicationSearchFilter';
+import ApplicationList from '@/components/pages/bar/application/ApplicationList';
+import ApplicationStatistics from '@/components/pages/bar/application/ApplicationStatistics';
+import ApplicationForm from '@/components/pages/bar/application/ApplicationForm';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/components/ui/use-toast';
+import { useRouter } from 'next/navigation';
+import useApplicationStore from '@/store/useApplicationStore'; // Dosya yolunu kontrol edin
 
 export default function ApplicationManagementPage() {
-  const [applications, setApplications] = useState([])
-  const [filteredApplications, setFilteredApplications] = useState([])
-  const [activeTab, setActiveTab] = useState('list')
-  const [showNewApplicationForm, setShowNewApplicationForm] = useState(false)
-  const { toast } = useToast()
-  const router = useRouter()
+  const {
+    applications,
+    fetchApplications,
+    addApplication,
+    updateApplication,
+  } = useApplicationStore();
+
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const [activeTab, setActiveTab] = useState('list');
+  const [showNewApplicationForm, setShowNewApplicationForm] = useState(false);
+  const [editingApplication, setEditingApplication] = useState<any | null>(null); // Eklenen State
 
   useEffect(() => {
-    // Verileri backend'den çekmek için API çağrısı
-    const fetchApplications = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/api/applications ', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            // Eğer gerekliyse token ekleyin
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-          },
-        })
+    fetchApplications().catch((error) => {
+      toast({
+        title: 'Hata',
+        description: `Başvurular yüklenirken bir hata oluştu: ${error.message}`,
+        variant: 'destructive',
+      });
+    });
+  }, [fetchApplications, toast]);
 
-        if (!response.ok) {
-          throw new Error('Başvurular alınamadı')
-        }
-
-        const data = await response.json()
-        setApplications(data)
-        setFilteredApplications(data)
-      } catch (error) {
-        console.error('Veri çekme hatası:', error)
-        toast({
-          title: 'Hata',
-          description: 'Başvurular alınırken bir hata oluştu.',
-          variant: 'destructive',
-        })
-      }
+  const handleNewApplication = async (newApplication: any) => {
+    try {
+      await addApplication(newApplication);
+      setShowNewApplicationForm(false);
+      toast({
+        title: 'Başvuru Eklendi',
+        description: 'Yeni başvuru başarıyla eklendi.',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Hata',
+        description: `Başvuru eklenirken bir hata oluştu: ${error.message}`,
+        variant: 'destructive',
+      });
     }
+  };
 
-    fetchApplications()
-  }, [])
+  const handleUpdateApplication = async (updatedApplication: any) => {
+    try {
+      await updateApplication(updatedApplication.id, updatedApplication);
+      toast({
+        title: 'Başvuru Güncellendi',
+        description: 'Başvuru bilgileri başarıyla güncellendi.',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Hata',
+        description: `Başvuru güncellenirken bir hata oluştu: ${error.message}`,
+        variant: 'destructive',
+      });
+    }
+  };
 
-  const handleNewApplication = (newApplication) => {
-    const newId = Date.now().toString() // ID'yi string olarak oluştur
-    const updatedApplications = [...applications, { ...newApplication, id: newId }]
-    setApplications(updatedApplications)
-    setFilteredApplications(updatedApplications)
-    setShowNewApplicationForm(false)
-    toast({
-      title: "Başvuru Eklendi",
-      description: "Yeni başvuru başarıyla eklendi.",
-    })
-  }
-
-  const handleUpdateApplication = (updatedApplication) => {
-    const updatedApplications = applications.map(app => 
-      app.id === updatedApplication.id ? updatedApplication : app
-    )
-    setApplications(updatedApplications)
-    setFilteredApplications(updatedApplications)
-    toast({
-      title: "Başvuru Güncellendi",
-      description: "Başvuru bilgileri başarıyla güncellendi.",
-    })
-  }
-
-  const handleDavaSelect = (application) => {
-    router.push(`/bar/application/${application.id}`)
-  }
+  const handleDavaSelect = (application: any) => {
+    router.push(`/bar/application/${application._id}`);
+  };
 
   return (
     <BaroDashboard>
       <div className="space-y-6 bg-gray-900 text-gray-100 p-6 rounded-lg">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Başvuru Yönetimi</h1>
-          <Button 
+          <Button
             onClick={() => setShowNewApplicationForm(true)}
             className="bg-green-600 hover:bg-green-700 text-white"
           >
@@ -93,7 +87,10 @@ export default function ApplicationManagementPage() {
           </Button>
         </div>
 
-        <ApplicationSearchFilter applications={applications} onFilter={setFilteredApplications} />
+        <ApplicationSearchFilter
+          applications={applications}
+          onFilter={(filtered) => console.log(filtered)} // Filter işlemi uygulanabilir
+        />
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
@@ -101,8 +98,8 @@ export default function ApplicationManagementPage() {
             <TabsTrigger value="statistics">İstatistikler</TabsTrigger>
           </TabsList>
           <TabsContent value="list">
-            <ApplicationList 
-              applications={filteredApplications}
+            <ApplicationList
+              applications={applications}
               onUpdateApplication={handleUpdateApplication}
               onDavaSelect={handleDavaSelect}
             />
@@ -114,11 +111,12 @@ export default function ApplicationManagementPage() {
 
         {showNewApplicationForm && (
           <ApplicationForm
+            application={editingApplication} // Null geçilebilir
             onClose={() => setShowNewApplicationForm(false)}
             onSubmit={handleNewApplication}
           />
         )}
       </div>
     </BaroDashboard>
-  )
+  );
 }
