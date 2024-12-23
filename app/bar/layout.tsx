@@ -1,6 +1,6 @@
 'use client'
 
-import { ReactNode, useEffect } from 'react'
+import { ReactNode } from 'react'
 import LoggedInHeader from '@/components/pages/bar/LoggedInHeader'
 import { Button } from '@/components/ui/button'
 import {
@@ -16,7 +16,6 @@ import { User, Settings, LogOut } from 'lucide-react'
 import ChatbotLayout from '@/components/ui/ChatbotLayout'
 import Link from 'next/link'
 import { Users } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 
 export default function DashboardLayout({
   children,

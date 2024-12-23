@@ -35,8 +35,8 @@ export default function DavaAramaFiltre({ davalar, onFilter }) {
           </SelectTrigger>
           <SelectContent className="bg-gray-800 text-gray-100 border-gray-700">
             <SelectItem value="all">Tüm Kategoriler</SelectItem>
-            <SelectItem value="ceza">Ceza Davası</SelectItem>
-            <SelectItem value="hukuk">Hukuk Davası</SelectItem>
+            <SelectItem value="67688842f6548c91aa3b44b8">Ceza Davası</SelectItem>
+            <SelectItem value="67688842f6548c91aa3b44b9">Hukuk Davası</SelectItem>
             <SelectItem value="idari">İdari Dava</SelectItem>
           </SelectContent>
         </Select>
