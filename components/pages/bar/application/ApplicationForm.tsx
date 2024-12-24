@@ -1,47 +1,65 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-export default function ApplicationForm({ application, onClose, onSubmit }) {
+export default function BaroApplicationForm({ application, onClose, onSubmit }) {
   const [formData, setFormData] = useState({
     applicantName: '',
-    applicationNumber: '',
-    caseSubject: '',
-    status: 'active',
-    applicationDate: new Date().toISOString().split('T')[0],
-    assignedLawyer: '',
-    summary: '',
-  })
+    contactDetails: {
+      email: '',
+      phone: '',
+      address: '',
+    },
+    eventTitle: '',
+    eventCategory: '',
+    status: 'beklemede',
+    date: new Date().toISOString().split('T')[0],
+    description: '',
+  });
 
   useEffect(() => {
     if (application) {
       setFormData({
         applicantName: application.applicantName || '',
-        applicationNumber: application.applicationNumber || '',
-        caseSubject: application.caseSubject || '',
-        status: application.status || 'active',
-        applicationDate: application.applicationDate || new Date().toISOString().split('T')[0],
-        assignedLawyer: application.assignedLawyer || '',
-        summary: application.summary || '',
-      })
+        contactDetails: {
+          email: application.contactDetails?.email || '',
+          phone: application.contactDetails?.phone || '',
+          address: application.contactDetails?.address || '',
+        },
+        eventTitle: application.eventTitle || '',
+        eventCategory: application.eventCategory || '',
+        status: application.status || 'beklemede',
+        date: application.date || new Date().toISOString().split('T')[0],
+        description: application.description || '',
+      });
     }
-  }, [application])
+  }, [application]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prevState => ({ ...prevState, [name]: value }))
-  }
+    const { name, value } = e.target;
+    if (['email', 'phone', 'address'].includes(name)) {
+      setFormData((prevState) => ({
+        ...prevState,
+        contactDetails: {
+          ...prevState.contactDetails,
+          [name]: value,
+        },
+      }));
+    } else {
+      setFormData((prevState) => ({ ...prevState, [name]: value }));
+    }
+  };
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    onSubmit(formData)
-  }
+    e.preventDefault();
+    onSubmit(formData);
+  };
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
@@ -65,80 +83,95 @@ export default function ApplicationForm({ application, onClose, onSubmit }) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="applicationNumber">Başvuru Numarası</Label>
+            <Label htmlFor="email">E-posta</Label>
             <Input
-              id="applicationNumber"
-              name="applicationNumber"
-              value={formData.applicationNumber}
+              id="email"
+              name="email"
+              value={formData.contactDetails.email}
               onChange={handleChange}
               className="bg-gray-700 text-gray-100"
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="caseSubject">Dava Konusu</Label>
+            <Label htmlFor="phone">Telefon</Label>
             <Input
-              id="caseSubject"
-              name="caseSubject"
-              value={formData.caseSubject}
+              id="phone"
+              name="phone"
+              value={formData.contactDetails.phone}
               onChange={handleChange}
               className="bg-gray-700 text-gray-100"
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="status">Durum</Label>
-            <Select name="status" value={formData.status} onValueChange={(value) => handleChange({ target: { name: 'status', value } })}>
+            <Label htmlFor="address">Adres</Label>
+            <Textarea
+              id="address"
+              name="address"
+              value={formData.contactDetails.address}
+              onChange={handleChange}
+              className="bg-gray-700 text-gray-100"
+              rows={3}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="eventTitle">Başvuru Başlığı</Label>
+            <Input
+              id="eventTitle"
+              name="eventTitle"
+              value={formData.eventTitle}
+              onChange={handleChange}
+              className="bg-gray-700 text-gray-100"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="eventCategory">Başvuru Kategorisi</Label>
+            <Select
+              name="eventCategory"
+              onValueChange={(value) => handleChange({ target: { name: 'eventCategory', value } })}
+            >
               <SelectTrigger className="bg-gray-700 text-gray-100">
-                <SelectValue placeholder="Durum seçin" />
+                <SelectValue placeholder="Kategori seçin" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="active">Aktif</SelectItem>
-                <SelectItem value="completed">Tamamlandı</SelectItem>
-                <SelectItem value="pending">Beklemede</SelectItem>
-                <SelectItem value="cancelled">İptal Edildi</SelectItem>
+                <SelectItem value="isHukuku">İş Hukuku</SelectItem>
+                <SelectItem value="egitimHakki">Eğitim Hakkı</SelectItem>
+                <SelectItem value="ifadeOzgurlugu">İfade Özgürlüğü</SelectItem>
+                <SelectItem value="kadinaKarsiSiddet">Kadına Karşı Şiddet</SelectItem>
+                <SelectItem value="cocukHaklari">Çocuk Hakları</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="applicationDate">Başvuru Tarihi</Label>
+            <Label htmlFor="date">Başvuru Tarihi</Label>
             <Input
-              id="applicationDate"
-              name="applicationDate"
+              id="date"
+              name="date"
               type="date"
-              value={formData.applicationDate}
+              value={formData.date}
               onChange={handleChange}
               className="bg-gray-700 text-gray-100"
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="assignedLawyer">Atanan Avukat</Label>
-            <Input
-              id="assignedLawyer"
-              name="assignedLawyer"
-              value={formData.assignedLawyer}
-              onChange={handleChange}
-              className="bg-gray-700 text-gray-100"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="summary">Özet</Label>
+            <Label htmlFor="description">Açıklama</Label>
             <Textarea
-              id="summary"
-              name="summary"
-              value={formData.summary}
+              id="description"
+              name="description"
+              value={formData.description}
               onChange={handleChange}
               className="bg-gray-700 text-gray-100"
               rows={4}
             />
           </div>
-          <Button type="submit" className="w-full">
+          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
             {application ? 'Güncelle' : 'Ekle'}
           </Button>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
-
